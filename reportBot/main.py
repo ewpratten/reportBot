@@ -1,13 +1,16 @@
+#!/usr/bin/env python3
 import devRantSimple as dRS
 import classRant as classes
 import os
 from pathlib import Path 
 import globals as glbl
 import requests
+import schedule
+import time
 
 def post(content):
     post = requests.post("https://hastebin.com/documents", data=content.encode('utf-8'))
-    return "https://hastebin.com/" + post.json()["key"]
+    return "https://hastebin.com/raw/" + post.json()["key"]
 
 # Log in
 home = str(Path.home())
@@ -78,13 +81,18 @@ def gathersnapshot(rantid):
     # for comment
 
 def loadbanlist():
-    lines = [line.rstrip('\n') for line in open('./banlist.txt')]
-    glbl.banlist = lines
+    # lines = [line.rstrip('\n') for line in open('./banlist.txt', 'r')]
+    # glbl.banlist = open('./banlist.txt', 'r')
+    with open('banlist.txt','r') as f:
+        for line in f:
+            for word in line.split():
+                glbl.banlist.append(word)
 
 def banadd(username):
     glbl.banlist.append(username)
     banfile = open('./banlist.txt', 'w')
     for item in glbl.banlist:
+        print(item)
         banfile.write("%s\n" % item)
     loadbanlist()
 
@@ -124,18 +132,29 @@ def respond(mention):
                             print("ban")
                             ban(mention.username, broken[2], mention.rantId)
                     if broken[2] == "report":
-                        link = gathersnapshot(mention.rantId)
-                        sendreport(mention.username, reportname, link, mention.rantId)
+                        # if broken[1] != "@dfox" and broken[1] != "@trogus":
+                        if mention.username not in glbl.banlist:
+                            link = gathersnapshot(mention.rantId)
+                            sendreport(mention.username, reportname, link, mention.rantId)
 
     print(comment.body)
     dRS.clearNotifs(uid, token, key)
 
-# idea:
-run = True
-loadbanlist()
-while run:
-    loadnotifs()
-    for mention in glbl.mentions:
-        if isvalid(mention):
-            respond(mention)
-    run = False
+def main():
+    # idea:
+    
+    run = True
+    loadbanlist()
+    print(glbl.banlist)
+    while run:
+        loadnotifs()
+        for mention in glbl.mentions:
+            if isvalid(mention):
+                respond(mention)
+        run = False
+
+main()
+# schedule.every(1).minutes.do(main)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
