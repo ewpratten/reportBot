@@ -18,3 +18,7 @@ def getComment(login: Token, id: int) -> str:
 
     # Return comment in readable form
     return response["comment"]["body"]
+
+def postComment(login: Token, text: str, id: int):
+    response = requests.post(toUrl(f"/devrant/rants/{id}/comments"), data={"app": app_id, "token_id": login.id, "token_key": login.key, "user_id": login.user, "plat":2, "comment":text})
+    # print(response)
