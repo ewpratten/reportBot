@@ -65,5 +65,9 @@ while True:
         postComment(auth_token, f"@{offender} has been reported\n\nJson dump of post: {paste(str(getRant(notif['rant_id'])))}", notif["rant_id"])
         print("Notified")
 
+        # Log to ewpratten's post
+        postComment(auth_token, f"@{offender} has been reported\n\nRant Link: https://devrant.com/rants/{notif['rant_id']}\nJson dump of post: {paste(str(getRant(notif['rant_id'])))}", 2052149)
+        print("Logged")
+
     # Sleep for time set in config
     time.sleep(time_step)
